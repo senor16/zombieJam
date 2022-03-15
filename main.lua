@@ -2,7 +2,7 @@
 io.stdout:setvbuf("no")
 -- Pour faire du pixel art
 love.graphics.setDefaultFilter("nearest")
-local screen = {}
+screen = {}
 TILEWIDTH=32
 TILEHEIGHT=32
 

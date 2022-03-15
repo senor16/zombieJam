@@ -13,6 +13,8 @@ function hero:load()
     end
     addAnimation(self.listAnimations,"IDLE",images,1/25,true)
 
+    serviceManager.zombieManager:load()
+
     -- RUN
     images={}
     for i=0, 13 do
@@ -61,17 +63,17 @@ function hero:update(dt)
     -- Hero movement
     self.vx=0
     self.vy=0
-    if love.keyboard.isDown("up") then
+    if love.keyboard.isDown("up") and self.y-TILEHEIGHT/2>0 then
         self.vy = -self.speed*10*dt
     end
-    if love.keyboard.isDown("right") then
+    if love.keyboard.isDown("right") and self.x+TILEWIDTH/2<screen.width then
         self.vx = self.speed*10*dt
         self.flip=1
     end
-    if love.keyboard.isDown("down") then
+    if love.keyboard.isDown("down") and self.y+TILEHEIGHT/2 < screen.height then
         self.vy = self.speed*10*dt
     end
-    if love.keyboard.isDown("left") then
+    if love.keyboard.isDown("left") and self.x-TILEHEIGHT/2>0 then
         self.vx = -self.speed*10*dt
         self.flip=-1
     end
