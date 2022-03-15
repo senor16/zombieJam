@@ -1,15 +1,5 @@
-local hero = {
-    x=100,
-    y=100,
-    vx=0,
-    vy=0,
-    flip=1,
-    speed=10,
-    listAnimations={},
-    currentAnimation=nil,
-    currentFrameInAnimation=1,
-    timer=0
-}
+local hero = newElement(100,100,10)
+hero.type = "HERO"
 function hero:load()
     local images= {}
     --- Add animations
@@ -21,7 +11,7 @@ function hero:load()
             images[i] = love.graphics.newImage("vault/Hero/Animations/Idle/Idle_0"..i..".png")
         end
     end
-    addAnimation(self,"IDLE",images,1/20,true)
+    addAnimation(self.listAnimations,"IDLE",images,1/25,true)
 
     -- RUN
     images={}
@@ -32,7 +22,7 @@ function hero:load()
             images[i] = love.graphics.newImage("vault/Hero/Animations/Run/Run_0"..i..".png")
         end
     end
-    addAnimation(self,"RUN",images,1/20,true)
+    addAnimation(self.listAnimations,"RUN",images,1/25,true)
 
     -- SHOOT
     images={}
@@ -43,14 +33,14 @@ function hero:load()
             images[i] = love.graphics.newImage("vault/Hero/Animations/Shoot/Shoot_0"..i..".png")
         end
     end
-    addAnimation(self,"SHOOT",images,1/20,true)
+    addAnimation(self.listAnimations,"SHOOT",images,1/25,true)
 
     -- HURT
     images={}
     for i=0, 9 do
             images[i] = love.graphics.newImage("vault/Hero/Animations/Hurt/Hurt_00"..i..".png")
     end
-    addAnimation(self,"HURT",images,1/20,true)
+    addAnimation(self.listAnimations,"HURT",images,1/25,true)
 
     -- DEATH
     images={}
@@ -61,7 +51,7 @@ function hero:load()
             images[i] = love.graphics.newImage("vault/Hero/Animations/Death/Death_0"..i..".png")
         end
     end
-    addAnimation(self,"DEATH",images,1/20,true)
+    addAnimation(self.listAnimations,"DEATH",images,1/25,true)
 
     playAnimation(self,"IDLE")
 end
