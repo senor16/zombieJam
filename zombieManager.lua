@@ -1,4 +1,4 @@
-function newZombie(pX, pY, pSpeed, pLevel, pListAnimations)
+local function newZombie(pX, pY, pSpeed, pLevel, pListAnimations)
     local zombie = newElement(pX, pY, pSpeed)
     zombie.type = "ZOMBIE"
     zombie.level = pLevel
@@ -15,6 +15,7 @@ function newZombie(pX, pY, pSpeed, pLevel, pListAnimations)
     function zombie:draw()
         if self.currentAnimation ~= nil then
             love.graphics.draw(self.currentAnimation.frames[self.currentFrameInAnimation], self.x, self.y, 0, self.flip, 1, TILEWIDTH / 2, TILEHEIGHT / 2)
+
         end
     end
 

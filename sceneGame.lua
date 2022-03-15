@@ -65,20 +65,16 @@ function updateAnimation(pEntity,dt)
     end
 end
 
-function dist(x1,y1,x2,y2)
-    return ((x2-x1)^2+(y2-y1)^2)^0.5
-end
 
-function math.angle(x1,y1, x2,y2)
-    return math.atan2(y2-y1, x2-x1)
-end
 
 local sceneGame = {}
 local hero = require("hero")
 local zombieManager = require("zombieManager")
+local shootManager = require("shootManager")
 serviceManager = {}
 serviceManager.hero = hero
 serviceManager.zombieManager = zombieManager
+serviceManager.shootManager = shootManager
 function sceneGame:load()
     hero:load()
     zombieManager:addZombie(100,200,1)
@@ -86,17 +82,20 @@ function sceneGame:load()
     zombieManager:addZombie(300,200,3)
     zombieManager:addZombie(400,200,4)
     zombieManager:load()
+    shootManager:load()
 end
 
 ---@param dt number
 function sceneGame:update(dt)
     hero:update(dt)
     zombieManager:update(dt)
+    shootManager:update(dt)
 end
 
 function sceneGame:draw()
     hero:draw()
     zombieManager:draw()
+    shootManager:draw()
 end
 
 return sceneGame
