@@ -14,27 +14,29 @@ function math.angle(x1,y1, x2,y2)
     return math.atan2(y2-y1, x2-x1)
 end
 
-local currentScene = "GAME"
+local SCENEGAME = "SCENEGAME"
+local currentScene = SCENEGAME
 local sceneGame = require("sceneGame")
 
 function love.load()
     screen.width = love.graphics.getWidth()
     screen.height = love.graphics.getHeight()
     love.window.setTitle("Zombie Jam")
-    if currentScene == "GAME" then
+    if currentScene == SCENEGAME then
         sceneGame:load()
     end
 end
 
 ---@param dt number
 function love.update(dt)
-    if currentScene == "GAME" then
+    if currentScene == SCENEGAME then
         sceneGame:update(dt)
     end
 end
 
 function love.draw()
-    if currentScene == "GAME" then
+    love.graphics.print(love.timer.getFPS().." FPS")
+    if currentScene == SCENEGAME then
         sceneGame:draw()
     end
 end

@@ -34,8 +34,6 @@ end
 function shootManager:addShoot(pX,pY,pVx,pVy,pRotation)
     local shoot = newShoot(pX,pY,pVx,pVy,pRotation,self.image)
     table.insert(self.listShoots,shoot)
-    print("Shoot "..#self.listShoots)
-
 end
 
 function shootManager:update(dt)

@@ -1,4 +1,4 @@
-local hero = newElement(100, 100, 10)
+local hero = newElement(100, 100, 6)
 hero.type = "HERO"
 hero.shootTimer = 0
 hero.shootTimerMax = .5
@@ -72,20 +72,20 @@ function hero:update(dt)
     self.vx = 0
     self.vy = 0
     if love.keyboard.isDown("up") and self.y - TILEHEIGHT / 2 > 0 then
-        self.vy = -self.speed * 10 * dt
+        self.vy = -self.speed * 60 * dt
         animation = "RUN"
     end
     if love.keyboard.isDown("right") and self.x + TILEWIDTH / 2 < screen.width then
-        self.vx = self.speed * 10 * dt
+        self.vx = self.speed * 60 * dt
         self.flip = 1
         animation = "RUN"
     end
     if love.keyboard.isDown("down") and self.y + TILEHEIGHT / 2 < screen.height then
-        self.vy = self.speed * 10 * dt
+        self.vy = self.speed * 60 * dt
         animation = "RUN"
     end
     if love.keyboard.isDown("left") and self.x - TILEHEIGHT / 2 > 0 then
-        self.vx = -self.speed * 10 * dt
+        self.vx = -self.speed * 60 * dt
         self.flip = -1
         animation = "RUN"
     end
