@@ -1,3 +1,11 @@
+-- constants
+ZS_WALK = "ZS_WALK"
+ZS_RUN = "ZS_RUN"
+ZS_ATTACK = "ZS_ATTACK"
+ZS_HURT = "ZS_HURT"
+ZS_DEAD = "ZS_DEAD"
+ZS_CHANGE = "ZS_CHANGE"
+
 --- Create a new element
 ---@param pX number
 ---@param pY number

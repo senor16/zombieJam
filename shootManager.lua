@@ -58,7 +58,7 @@ function shootManager:update(dt)
         shoot:update(dt)
         for z=#serviceManager.zombieManager.listZombies,1,-1 do
             zombie =serviceManager.zombieManager.listZombies[z]
-            if(isColliding(shoot.x,shoot.y,self.image:getWidth(),self.image:getHeight(),zombie.x-TILEWIDTH/2,zombie.y-TILEHEIGHT/2,TILEWIDTH,TILEHEIGHT)) then
+            if(zombie.state ~= ZS_DEAD and 0 and isColliding(shoot.x,shoot.y,self.image:getWidth(),self.image:getHeight(),zombie.x-TILEWIDTH/2,zombie.y-TILEHEIGHT/2,TILEWIDTH,TILEHEIGHT)) then
                 zombie:hurt()
                 table.remove(self.listShoots,i)
             end

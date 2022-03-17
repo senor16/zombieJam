@@ -1,9 +1,4 @@
-local WALK = "WALK"
-local RUN = "RUN"
-local ATTACK = "ATTACK"
-local HURT = "HURT"
-local DEAD = "DEAD"
-local CHANGE = "CHANGE"
+
 
 --- Create a new zombie
 ---@param pX number
@@ -12,7 +7,7 @@ local CHANGE = "CHANGE"
 ---@param pListAnimations table
 ---@return table
 local function newZombie(pX, pY, pSpeed, pLevel, pListAnimations)
-    local animation = WALK
+    local animation = ZS_WALK
     local chaos = { x = 0, y = 0 }
     local zombie = newElement(pX, pY, pSpeed)
     local angle = 0
@@ -21,7 +16,7 @@ local function newZombie(pX, pY, pSpeed, pLevel, pListAnimations)
     zombie.canRemove=false
     zombie.timerDisappear = 1
     zombie.type = "ZOMBIE"
-    zombie.state = CHANGE
+    zombie.state = ZS_CHANGE
     zombie.level = pLevel
     zombie.target = nil
     zombie.range = math.random(30, 120)
@@ -36,9 +31,9 @@ local function newZombie(pX, pY, pSpeed, pLevel, pListAnimations)
     --- Inflict damage to the zombie
     function zombie:hurt()
         self.energy = self.energy - 1
-        self.state = HURT
+        self.state = ZS_HURT
         if self.energy <= 0 then
-            self.state = DEAD
+            self.state = ZS_DEAD
         end
     end
 
@@ -46,37 +41,37 @@ local function newZombie(pX, pY, pSpeed, pLevel, pListAnimations)
     function zombie:update(dt)
         updateAnimation(self, dt)
 
-        -- CHANGE
-        if self.state == CHANGE then
+        -- ZS_CHANGE
+        if self.state == ZS_CHANGE then
             self.target = nil
             angle = math.angle(self.x, self.y, love.math.random(0, screen.width / 2), love.math.random(0, screen.height / 2))
             self.vx = self.speed * 60 * dt * math.cos(angle)
             self.vy = self.speed * 60 * dt * math.sin(angle)
-            self.state = WALK
+            self.state = ZS_WALK
         end
-        -- WALK
-        if self.state == WALK then
-            animation = WALK
+        -- ZS_WALK
+        if self.state == ZS_WALK then
+            animation = ZS_WALK
             if math.dist(self.x, self.y, serviceManager.hero.x, serviceManager.hero.y) <= zombie.range then
-                self.state = RUN
+                self.state = ZS_RUN
                 self.target = serviceManager.hero
             end
 
             if self.y - TILEHEIGHT / 2 < 0 then
-                self.state = CHANGE
+                self.state = ZS_CHANGE
             end
             if self.x + TILEWIDTH / 2 > screen.width then
-                self.state = CHANGE
+                self.state = ZS_CHANGE
             end
             if self.y + TILEHEIGHT / 2 > screen.height then
-                self.state = CHANGE
+                self.state = ZS_CHANGE
             end
             if self.x - TILEHEIGHT / 2 < 0 then
-                self.state = CHANGE
+                self.state = ZS_CHANGE
             end
         end
-        -- RUN
-        if self.state == RUN then
+        -- ZS_RUN
+        if self.state == ZS_RUN then
             if self.target ~= nil then
                 animation = self.state
                 -- Some chaos in the direction
@@ -87,15 +82,15 @@ local function newZombie(pX, pY, pSpeed, pLevel, pListAnimations)
                 self.vx = self.speed * 2 * 60 * math.cos(angle)
                 self.vy = self.speed * 2 * 60 * math.sin(angle)
                 if math.dist(self.x, self.y, self.target.x, self.target.y) > self.range then
-                    self.state = CHANGE
+                    self.state = ZS_CHANGE
                 end
                 if math.dist(self.x, self.y, self.target.x, self.target.y) <= 5 then
-                    self.state = ATTACK
+                    self.state = ZS_ATTACK
                 end
             end
         end
-        -- ATTACK
-        if self.state == ATTACK then
+        -- ZS_ATTACK
+        if self.state == ZS_ATTACK then
             animation = self.state
             if self.target ~= nil then
                 if math.dist(self.x, self.y, self.target.x, self.target.y) <= 5 then
@@ -107,24 +102,24 @@ local function newZombie(pX, pY, pSpeed, pLevel, pListAnimations)
                         self.timerAttack = self.currentAnimation.speed * #self.currentAnimation.frames
                     end
                 else
-                    self.state = RUN
+                    self.state = ZS_RUN
                 end
             end
         end
 
-        -- HURT
-        if self.state == HURT then
-            animation = HURT
+        -- ZS_HURT
+        if self.state == ZS_HURT then
+            animation = ZS_HURT
             self.vx = 0
             self.vy = 0
             if self.currentAnimation.ended then
-                self.state = CHANGE
+                self.state = ZS_CHANGE
             end
         end
 
-        -- DEAD
-        if self.state == DEAD then
-            animation = DEAD
+        -- ZS_DEAD
+        if self.state == ZS_DEAD then
+            animation = ZS_DEAD
             self.vx = 0
             self.vy = 0
             -- Make the zombie ready to be remove from the zombie list
@@ -182,41 +177,41 @@ for level = 1, #listAnimations do
     end
     addAnimation(listAnimations[level], "IDLE", images, 1 / 8, true)
 
-    -- WALK
+    -- ZS_WALK
     images = {}
     for i = 1, 6 do
         images[i] = love.graphics.newImage("vault/Zombies/Zombie" .. level .. "/animation/Walk" .. i .. ".png")
     end
-    addAnimation(listAnimations[level], "WALK", images, 1 / 8, true)
+    addAnimation(listAnimations[level], "ZS_WALK", images, 1 / 8, true)
 
 
-    -- RUN
+    -- ZS_RUN
     images = {}
     for i = 1, 5 do
         images[i] = love.graphics.newImage("vault/Zombies/Zombie" .. level .. "/animation/Run" .. i + 5 .. ".png")
     end
-    addAnimation(listAnimations[level], "RUN", images, 1 / 8, true)
+    addAnimation(listAnimations[level], "ZS_RUN", images, 1 / 8, true)
 
-    -- ATTACK
+    -- ZS_ATTACK
     images = {}
     for i = 1, 6 do
         images[i] = love.graphics.newImage("vault/Zombies/Zombie" .. level .. "/animation/Attack" .. i .. ".png")
     end
-    addAnimation(listAnimations[level], "ATTACK", images, 1 / 8, true)
+    addAnimation(listAnimations[level], "ZS_ATTACK", images, 1 / 8, true)
 
-    -- HURT
+    -- ZS_HURT
     images = {}
     for i = 1, 5 do
         images[i] = love.graphics.newImage("vault/Zombies/Zombie" .. level .. "/animation/Hurt" .. i .. ".png")
     end
-    addAnimation(listAnimations[level], "HURT", images, 1 / 8, false)
+    addAnimation(listAnimations[level], "ZS_HURT", images, 1 / 8, false)
 
-    -- DEAD
+    -- ZS_DEAD
     images = {}
     for i = 1, 8 do
         images[i] = love.graphics.newImage("vault/Zombies/Zombie" .. level .. "/animation/Dead" .. i .. ".png")
     end
-    addAnimation(listAnimations[level], "DEAD", images, 1 / 8, false)
+    addAnimation(listAnimations[level], "ZS_DEAD", images, 1 / 8, false)
 
 end
 
