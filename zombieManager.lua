@@ -18,6 +18,8 @@ local function newZombie(pX, pY, pSpeed, pLevel, pListAnimations)
     local angle = 0
     zombie.timerAttack = 0
     zombie.previousState = ""
+    zombie.canRemove=false
+    zombie.timerDisappear = 1
     zombie.type = "ZOMBIE"
     zombie.state = CHANGE
     zombie.level = pLevel
@@ -35,6 +37,9 @@ local function newZombie(pX, pY, pSpeed, pLevel, pListAnimations)
     function zombie:hurt()
         self.energy = self.energy - 1
         self.state = HURT
+        if self.energy <= 0 then
+            self.state = DEAD
+        end
     end
 
     --- Update the zombie
@@ -116,6 +121,20 @@ local function newZombie(pX, pY, pSpeed, pLevel, pListAnimations)
                 self.state = CHANGE
             end
         end
+
+        -- DEAD
+        if self.state == DEAD then
+            animation = DEAD
+            self.vx = 0
+            self.vy = 0
+            -- Make the zombie ready to be remove from the zombie list
+            if self.currentAnimation.ended then
+                self.timerDisappear = self.timerDisappear-dt
+                if self.timerDisappear <=0 then
+                    self.canRemove = true
+                end
+            end
+        end
         playAnimation(self, animation)
         if self.vx < 0.5 then
             self.flip = -math.abs(self.flip)
@@ -130,10 +149,12 @@ local function newZombie(pX, pY, pSpeed, pLevel, pListAnimations)
     --- Draw the zombie
     function zombie:draw()
         if self.currentAnimation ~= nil then
+            love.graphics.setColor(1,1,1,self.timerDisappear)
             love.graphics.draw(self.currentAnimation.frames[self.currentFrameInAnimation], self.x, self.y, 0, self.flip, 1, TILEWIDTH / 2, TILEHEIGHT / 2)
-            love.graphics.print(self.state, self.x, self.y - TILEHEIGHT)
+            love.graphics.setColor(1,1,1,1)
+            --love.graphics.print(self.state, self.x, self.y - TILEHEIGHT)
             --love.graphics.circle("line", self.x, self.y, self.range)
-            love.graphics.print(self.energy, self.x - TILEWIDTH/1.5, self.y - TILEHEIGHT)
+            --love.graphics.print(tostring(self.canRemove)..", E: "..self.energy..", D: ", self.x - TILEWIDTH / 1.5, self.y - TILEHEIGHT)
             --love.graphics.print(math.floor(math.dist(serviceManager.hero.x,serviceManager.hero.y,self.x,self.y)), self.x - TILEWIDTH, self.y - TILEHEIGHT)
 
         end
@@ -215,8 +236,11 @@ end
 
 --- Update the zombie manager
 function zombieManager:update(dt)
-    for i = 1, #self.listZombies do
+    for i = #self.listZombies,1,-1 do
         self.listZombies[i]:update(dt)
+        if self.listZombies[i].canRemove then
+            table.remove(self.listZombies,i)
+        end
     end
 end
 

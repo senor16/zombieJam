@@ -2,7 +2,7 @@ local hero = newElement(100, 100, 6)
 hero.type = "HERO"
 hero.shootTimer = 0
 hero.shootTimerMax = .3
-hero.radius = 120
+hero.range = 120
 local animation = "IDLE"
 local zombie
 local dist
@@ -112,10 +112,11 @@ function hero:update(dt)
         if self.shootTimer <= 0 then
             -- Find the nearest zombie
             target.dist = 9000
+            target.id=0
             for z = #serviceManager.zombieManager.listZombies, 1, -1 do
                 zombie = serviceManager.zombieManager.listZombies[z]
                 dist = math.dist(zombie.x, zombie.y, self.x, self.y)
-                if dist < self.radius then
+                if dist < self.range then
                     if target.dist > dist then
                         target.dist = dist
                         target.id = z
@@ -124,17 +125,18 @@ function hero:update(dt)
             end
             -- Shoot a the nearest zombie
             zombie = serviceManager.zombieManager.listZombies[target.id]
-            print(math.floor(target.dist) .. " => " .. zombie.level)
-            shoot.angle = math.angle(self.x, self.y, zombie.x, zombie.y)
-            shoot.vx = 4 * math.cos(shoot.angle)
-            shoot.vy = 4 * math.sin(shoot.angle)
-            if shoot.vx <= 0 then
-                self.flip = -math.abs(self.flip)
-            else
-                self.flip = math.abs(self.flip)
+            if zombie ~= nil then
+                shoot.angle = math.angle(self.x, self.y, zombie.x, zombie.y)
+                shoot.vx = 4 * math.cos(shoot.angle)
+                shoot.vy = 4 * math.sin(shoot.angle)
+                if shoot.vx <= 0 then
+                    self.flip = -math.abs(self.flip)
+                else
+                    self.flip = math.abs(self.flip)
+                end
+                serviceManager.shootManager:addShoot(self.x, self.y, shoot.vx, shoot.vy, shoot.angle)
+                fired = true
             end
-            serviceManager.shootManager:addShoot(self.x, self.y, shoot.vx, shoot.vy, shoot.angle)
-            fired = true
             if fired == false then
                 if self.flip < 0 then
                     angle = math.rad(180)
@@ -155,8 +157,8 @@ end
 function hero:draw  ()
     if self.currentAnimation ~= nil then
         love.graphics.draw(self.currentAnimation.frames[self.currentFrameInAnimation], self.x, self.y, 0, self.flip, 1, TILEWIDTH / 2, TILEHEIGHT / 2)
-        --love.graphics.circle("line", self.x, self.y, self.radius)
-        love.graphics.print(self.energy, self.x, self.y - TILEHEIGHT)
+        --love.graphics.circle("line", self.x, self.y, self.range)
+        --love.graphics.print(self.energy, self.x, self.y - TILEHEIGHT)
         --for i=1,#serviceManager.zombieManager.listZombies do
         --    zombie = serviceManager.zombieManager.listZombies[i]
         --    love.graphics.line(self.x,self.y,zombie.x,zombie.y)
