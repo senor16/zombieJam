@@ -147,10 +147,10 @@ local function newZombie(pX, pY, pSpeed, pLevel, pListAnimations)
             love.graphics.setColor(1,1,1,self.timerDisappear)
             love.graphics.draw(self.currentAnimation.frames[self.currentFrameInAnimation], self.x, self.y, 0, self.flip, 1, TILEWIDTH / 2, TILEHEIGHT / 2)
             love.graphics.setColor(1,1,1,1)
-            --love.graphics.print(self.state, self.x, self.y - TILEHEIGHT)
-            --love.graphics.circle("line", self.x, self.y, self.range)
-            --love.graphics.print(tostring(self.canRemove)..", E: "..self.energy..", D: ", self.x - TILEWIDTH / 1.5, self.y - TILEHEIGHT)
-            --love.graphics.print(math.floor(math.dist(serviceManager.hero.x,serviceManager.hero.y,self.x,self.y)), self.x - TILEWIDTH, self.y - TILEHEIGHT)
+            love.graphics.print(self.state, self.x, self.y - TILEHEIGHT)
+            love.graphics.circle("line", self.x, self.y, self.range)
+            love.graphics.print(tostring(self.canRemove)..", E: "..self.energy..", D: ", self.x - TILEWIDTH / 1.5, self.y - TILEHEIGHT)
+            love.graphics.print(math.floor(math.dist(serviceManager.hero.x,serviceManager.hero.y,self.x,self.y)), self.x - TILEWIDTH, self.y - TILEHEIGHT)
 
         end
     end

@@ -96,20 +96,45 @@ local sceneGame = {}
 local hero = require("hero")
 local zombieManager = require("zombieManager")
 local shootManager = require("shootManager")
+local image
+local quads={}
+local id=1
+local x,y=0,0
+local background
+local wall
+local map = require("map")
+local sprite=0
+local tile
 serviceManager = {}
-serviceManager.hero = hero
-serviceManager.zombieManager = zombieManager
-serviceManager.shootManager = shootManager
+
 
 --- Load the game scene
 function sceneGame:load()
+    tile = map.tilesets[1]
+    image =  love.graphics.newImage(tile.image)
+    id=1
+
+    for j=1,tile.imageheight/TILEHEIGHT do
+        x=0
+        for i=1, tile.columns do
+            quads[id] = love.graphics.newQuad(x,y,map.tilewidth,map.tileheight,image:getWidth(),image:getHeight())
+            id=id+1
+            x=x+map.tilewidth
+        end
+        y=y+map.tileheight
+    end
     hero:load()
     zombieManager:addZombie(100, 200, 1)
     zombieManager:addZombie(200, 200, 2)
     zombieManager:addZombie(300, 200, 3)
     zombieManager:addZombie(400, 200, 4)
+    serviceManager.hero = hero
+    serviceManager.zombieManager = zombieManager
+    serviceManager.shootManager = shootManager
     zombieManager:load()
     shootManager:load()
+
+
 end
 
 --- Update the game scene
@@ -120,8 +145,33 @@ function sceneGame:update(dt)
     shootManager:update(dt)
 end
 
+function drawMap()
+    background = map.layers[1]
+    wall = map.layers[2]
+    x,y=0,0
+    id=1
+    for j=1, background.height do
+        x=0
+        for i=1, background.width do
+            sprite = background.data[id]
+            if sprite ~= 0 then
+                love.graphics.draw(image,quads[sprite],x,y)
+            end
+            sprite = wall.data[id]
+            if sprite ~= 0 then
+                love.graphics.draw(image,quads[sprite],x,y)
+            end
+
+            id=id+1
+            x=x+map.tilewidth
+        end
+        y=y+map.tileheight
+    end
+end
+
 --- Draw the game scene
 function sceneGame:draw()
+    drawMap()
     hero:draw()
     zombieManager:draw()
     shootManager:draw()

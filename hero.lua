@@ -22,8 +22,6 @@ function hero:load()
     end
     addAnimation(self.listAnimations, "IDLE", images, 1 / 25, true)
 
-    serviceManager.zombieManager:load()
-
     -- RUN
     images = {}
     for i = 0, 13 do
@@ -157,12 +155,12 @@ end
 function hero:draw  ()
     if self.currentAnimation ~= nil then
         love.graphics.draw(self.currentAnimation.frames[self.currentFrameInAnimation], self.x, self.y, 0, self.flip, 1, TILEWIDTH / 2, TILEHEIGHT / 2)
-        --love.graphics.circle("line", self.x, self.y, self.range)
-        --love.graphics.print(self.energy, self.x, self.y - TILEHEIGHT)
-        --for i=1,#serviceManager.zombieManager.listZombies do
-        --    zombie = serviceManager.zombieManager.listZombies[i]
-        --    love.graphics.line(self.x,self.y,zombie.x,zombie.y)
-        --end
+        love.graphics.circle("line", self.x, self.y, self.range)
+        love.graphics.print(self.energy, self.x, self.y - TILEHEIGHT)
+        for i=1,#serviceManager.zombieManager.listZombies do
+            zombie = serviceManager.zombieManager.listZombies[i]
+            love.graphics.line(self.x,self.y,zombie.x,zombie.y)
+        end
     end
 end
 
