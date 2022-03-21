@@ -102,9 +102,9 @@ local image
 local quads={}
 local id=1
 local x,y=0,0
-local map = require("map")
-local background = map.layers[1]
-local wall = map.layers[2]
+local map
+local background
+local wall
 local sprite=0
 local tile
 serviceManager = {}
@@ -127,9 +127,11 @@ function isWall(pNum)
     return wall.data[pNum] ~= 0
 end
 
+function loadLevel(pLevel)
 
---- Load the game scene
-function sceneGame:load()
+    map = require("vault/levels/level"..pLevel)
+    background = map.layers[1]
+    wall = map.layers[2]
     tile = map.tilesets[1]
     image =  love.graphics.newImage(tile.image)
     id=1
@@ -143,6 +145,12 @@ function sceneGame:load()
         end
         y=y+map.tileheight
     end
+end
+
+
+--- Load the game scene
+function sceneGame:load()
+    loadLevel(3)
     hero:load()
     zombieManager:addZombie(100, 200, 1)
     zombieManager:addZombie(200, 200, 2)
