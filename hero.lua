@@ -6,6 +6,7 @@ hero.range = 120
 local animation = "IDLE"
 local zombie
 local dist
+local oldX, oldY
 local target = { id = 0, dist = 8000 }
 local fired = false
 local shoot = { vx = 0, vy = 0, angle = 0 }
@@ -78,6 +79,9 @@ function hero:update(dt)
     -- Hero movement
     self.vx = 0
     self.vy = 0
+    -- Backup hero position
+    oldX = self.x
+    oldY = self.y
     if love.keyboard.isDown("up") and self.y - TILEHEIGHT / 2 > 0 then
         self.vy = -self.speed * 60 * dt
         animation = "RUN"
@@ -96,9 +100,14 @@ function hero:update(dt)
         self.flip = -1
         animation = "RUN"
     end
-
     self.x = self.x + self.vx
     self.y = self.y + self.vy
+    ---- Check if the hero is not in a wall
+    if isWall(getPosition(self.x-TILEWIDTH/3, self.y-TILEHEIGHT/3)) or isWall(getPosition(self.x+TILEWIDTH/3, self.y+TILEHEIGHT/3)) then
+        -- If he is, bring him back
+        self.x = oldX
+        self.y = oldY
+    end
 
     -- Hero animation
     updateAnimation(self, dt)
@@ -110,7 +119,7 @@ function hero:update(dt)
         if self.shootTimer <= 0 then
             -- Find the nearest zombie
             target.dist = 9000
-            target.id=0
+            target.id = 0
             for z = #serviceManager.zombieManager.listZombies, 1, -1 do
                 zombie = serviceManager.zombieManager.listZombies[z]
                 dist = math.dist(zombie.x, zombie.y, self.x, self.y)
@@ -157,9 +166,9 @@ function hero:draw  ()
         love.graphics.draw(self.currentAnimation.frames[self.currentFrameInAnimation], self.x, self.y, 0, self.flip, 1, TILEWIDTH / 2, TILEHEIGHT / 2)
         love.graphics.circle("line", self.x, self.y, self.range)
         love.graphics.print(self.energy, self.x, self.y - TILEHEIGHT)
-        for i=1,#serviceManager.zombieManager.listZombies do
+        for i = 1, #serviceManager.zombieManager.listZombies do
             zombie = serviceManager.zombieManager.listZombies[i]
-            love.graphics.line(self.x,self.y,zombie.x,zombie.y)
+            love.graphics.line(self.x, self.y, zombie.x, zombie.y)
         end
     end
 end

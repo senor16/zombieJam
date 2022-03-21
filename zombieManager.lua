@@ -1,5 +1,3 @@
-
-
 --- Create a new zombie
 ---@param pX number
 ---@param pY number
@@ -11,15 +9,16 @@ local function newZombie(pX, pY, pSpeed, pLevel, pListAnimations)
     local chaos = { x = 0, y = 0 }
     local zombie = newElement(pX, pY, pSpeed)
     local angle = 0
+    local oldX, oldY
     zombie.timerAttack = 0
     zombie.previousState = ""
-    zombie.canRemove=false
+    zombie.canRemove = false
     zombie.timerDisappear = 1
     zombie.type = "ZOMBIE"
     zombie.state = ZS_CHANGE
     zombie.level = pLevel
     zombie.target = nil
-    zombie.range = math.random(30, 120)
+    zombie.range = math.random(50, 120)
     zombie.listAnimations = pListAnimations
     zombie.speed = pLevel * 5 / 1000
 
@@ -40,7 +39,9 @@ local function newZombie(pX, pY, pSpeed, pLevel, pListAnimations)
     --- Update the zombie
     function zombie:update(dt)
         updateAnimation(self, dt)
-
+        -- Backup zombie position
+        oldX = self.x
+        oldY = self.y
         -- ZS_CHANGE
         if self.state == ZS_CHANGE then
             self.target = nil
@@ -124,8 +125,8 @@ local function newZombie(pX, pY, pSpeed, pLevel, pListAnimations)
             self.vy = 0
             -- Make the zombie ready to be remove from the zombie list
             if self.currentAnimation.ended then
-                self.timerDisappear = self.timerDisappear-dt
-                if self.timerDisappear <=0 then
+                self.timerDisappear = self.timerDisappear - dt
+                if self.timerDisappear <= 0 then
                     self.canRemove = true
                 end
             end
@@ -139,18 +140,25 @@ local function newZombie(pX, pY, pSpeed, pLevel, pListAnimations)
 
         self.x = self.x + self.vx
         self.y = self.y + self.vy
+        ---- Check if the hero is not in a wall
+        if isWall(getPosition(self.x - TILEWIDTH / 3, self.y - TILEHEIGHT / 3)) or isWall(getPosition(self.x + TILEWIDTH / 3, self.y + TILEHEIGHT / 3)) then
+            -- If he is, bring him back
+            self.x = oldX
+            self.y = oldY
+            self.state = ZS_CHANGE
+        end
     end
 
     --- Draw the zombie
     function zombie:draw()
         if self.currentAnimation ~= nil then
-            love.graphics.setColor(1,1,1,self.timerDisappear)
+            love.graphics.setColor(1, 1, 1, self.timerDisappear)
             love.graphics.draw(self.currentAnimation.frames[self.currentFrameInAnimation], self.x, self.y, 0, self.flip, 1, TILEWIDTH / 2, TILEHEIGHT / 2)
-            love.graphics.setColor(1,1,1,1)
+            love.graphics.setColor(1, 1, 1, 1)
             love.graphics.print(self.state, self.x, self.y - TILEHEIGHT)
             love.graphics.circle("line", self.x, self.y, self.range)
-            love.graphics.print(tostring(self.canRemove)..", E: "..self.energy..", D: ", self.x - TILEWIDTH / 1.5, self.y - TILEHEIGHT)
-            love.graphics.print(math.floor(math.dist(serviceManager.hero.x,serviceManager.hero.y,self.x,self.y)), self.x - TILEWIDTH, self.y - TILEHEIGHT)
+            love.graphics.print(tostring(self.canRemove) .. ", E: " .. self.energy .. ", D: ", self.x - TILEWIDTH / 1.5, self.y - TILEHEIGHT)
+            love.graphics.print(math.floor(math.dist(serviceManager.hero.x, serviceManager.hero.y, self.x, self.y)), self.x - TILEWIDTH, self.y - TILEHEIGHT)
 
         end
     end
@@ -231,10 +239,10 @@ end
 
 --- Update the zombie manager
 function zombieManager:update(dt)
-    for i = #self.listZombies,1,-1 do
+    for i = #self.listZombies, 1, -1 do
         self.listZombies[i]:update(dt)
         if self.listZombies[i].canRemove then
-            table.remove(self.listZombies,i)
+            table.remove(self.listZombies, i)
         end
     end
 end

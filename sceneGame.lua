@@ -92,6 +92,8 @@ function isColliding(x1, y1, w1, h1, x2, y2, w2, h2)
     return x1 < x2 + w2 and x2 < x1 + w1 and y1 < y2 + h2 and y2 < y1 + h1
 end
 
+
+
 local sceneGame = {}
 local hero = require("hero")
 local zombieManager = require("zombieManager")
@@ -100,12 +102,30 @@ local image
 local quads={}
 local id=1
 local x,y=0,0
-local background
-local wall
 local map = require("map")
+local background = map.layers[1]
+local wall = map.layers[2]
 local sprite=0
 local tile
 serviceManager = {}
+
+--- Get object position in the map
+---@param pX number
+---@param pY number
+function getPosition(pX,pY)
+    local col = math.floor(pX/map.tilewidth)+1
+    local line = math.floor(pY/map.tileheight)+1
+    --print(pY.." => "..line.."; "..pX.." => "..col)
+    --print(line,col,(line-1)*map.width+col)
+    return (line-1)*map.width+col
+end
+
+
+--- Check is a tile is a wall
+---@param pNum number
+function isWall(pNum)
+    return wall.data[pNum] ~= 0
+end
 
 
 --- Load the game scene
@@ -133,9 +153,8 @@ function sceneGame:load()
     serviceManager.shootManager = shootManager
     zombieManager:load()
     shootManager:load()
-
-
 end
+
 
 --- Update the game scene
 ---@param dt number
@@ -146,8 +165,6 @@ function sceneGame:update(dt)
 end
 
 function drawMap()
-    background = map.layers[1]
-    wall = map.layers[2]
     x,y=0,0
     id=1
     for j=1, background.height do
