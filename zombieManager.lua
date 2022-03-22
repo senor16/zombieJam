@@ -18,10 +18,10 @@ local function newZombie(pX, pY, pSpeed, pLevel, pListAnimations)
     zombie.state = ZS_CHANGE
     zombie.level = pLevel
     zombie.target = nil
-    zombie.range = math.random(50, 120)
+    zombie.range = math.random(40, 100)
     zombie.listAnimations = pListAnimations
-    zombie.speed = pLevel * 5 / 1000
-
+    zombie.speed = pLevel * 3 / 1000
+    zombie.energy = pLevel*2.5
     --- Update the zombie
     function zombie:load()
         playAnimation(self, animation)
@@ -53,6 +53,7 @@ local function newZombie(pX, pY, pSpeed, pLevel, pListAnimations)
         -- ZS_WALK
         if self.state == ZS_WALK then
             animation = ZS_WALK
+            -- Look for the hero, then run at him
             if math.dist(self.x, self.y, serviceManager.hero.x, serviceManager.hero.y) <= zombie.range then
                 self.state = ZS_RUN
                 self.target = serviceManager.hero
@@ -131,6 +132,7 @@ local function newZombie(pX, pY, pSpeed, pLevel, pListAnimations)
                 end
             end
         end
+
         playAnimation(self, animation)
         if self.vx < 0.5 then
             self.flip = -math.abs(self.flip)
@@ -141,11 +143,13 @@ local function newZombie(pX, pY, pSpeed, pLevel, pListAnimations)
         self.x = self.x + self.vx
         self.y = self.y + self.vy
         ---- Check if the hero is not in a wall
-        if isWall(getPosition(self.x - TILEWIDTH / 3, self.y - TILEHEIGHT / 3)) or isWall(getPosition(self.x + TILEWIDTH / 3, self.y + TILEHEIGHT / 3)) then
-            -- If he is, bring him back
-            self.x = oldX
-            self.y = oldY
-            self.state = ZS_CHANGE
+        if self.state ~= ZS_DEAD then
+            if isWall(getPosition(self.x - TILEWIDTH / 3, self.y - TILEHEIGHT / 3)) or isWall(getPosition(self.x + TILEWIDTH / 3, self.y + TILEHEIGHT / 3)) then
+                -- If he is, bring him back
+                self.x = oldX
+                self.y = oldY
+                self.state = ZS_CHANGE
+            end
         end
     end
 
@@ -155,10 +159,10 @@ local function newZombie(pX, pY, pSpeed, pLevel, pListAnimations)
             love.graphics.setColor(1, 1, 1, self.timerDisappear)
             love.graphics.draw(self.currentAnimation.frames[self.currentFrameInAnimation], self.x, self.y, 0, self.flip, 1, TILEWIDTH / 2, TILEHEIGHT / 2)
             love.graphics.setColor(1, 1, 1, 1)
-            love.graphics.print(self.state, self.x, self.y - TILEHEIGHT)
-            love.graphics.circle("line", self.x, self.y, self.range)
-            love.graphics.print(tostring(self.canRemove) .. ", E: " .. self.energy .. ", D: ", self.x - TILEWIDTH / 1.5, self.y - TILEHEIGHT)
-            love.graphics.print(math.floor(math.dist(serviceManager.hero.x, serviceManager.hero.y, self.x, self.y)), self.x - TILEWIDTH, self.y - TILEHEIGHT)
+--             love.graphics.print(self.state, self.x, self.y - TILEHEIGHT)
+--             love.graphics.circle("line", self.x, self.y, self.range)
+            love.graphics.print(self.energy, self.x - TILEWIDTH / 1.5, self.y - TILEHEIGHT)
+--             love.graphics.print(math.floor(math.dist(serviceManager.hero.x, serviceManager.hero.y, self.x, self.y)), self.x - TILEWIDTH, self.y - TILEHEIGHT)
 
         end
     end
@@ -167,7 +171,9 @@ local function newZombie(pX, pY, pSpeed, pLevel, pListAnimations)
 end
 
 local zombieManager = {
-    listZombies = {}
+    listZombies = {},
+    countTypes={0,0,0,0},
+    currentFrameInAnimation=1
 }
 local listAnimations = {}
 listAnimations[1] = {}
@@ -220,12 +226,24 @@ for level = 1, #listAnimations do
         images[i] = love.graphics.newImage("vault/Zombies/Zombie" .. level .. "/animation/Dead" .. i .. ".png")
     end
     addAnimation(listAnimations[level], "ZS_DEAD", images, 1 / 8, false)
-
 end
+
+local headAnimations={}
+
+for level=1,4 do
+    images = {}
+    headAnimations[level]={}
+    for i = 1, 6 do
+        images[i] = love.graphics.newImage("vault/Zombies/Zombie" .. level .. "/animation/head" .. i .. ".png")
+    end
+    headAnimations[level] = images
+end
+
 
 --- Register a zombie to the zombie manager
 function zombieManager:addZombie(pX, pY, pLevel)
     local speed = { 1, 2, 3, 4 }
+    self.countTypes[pLevel] = self.countTypes[pLevel]+1
     local zombie = newZombie(pX, pY, speed[pLevel], pLevel, listAnimations[pLevel])
     table.insert(self.listZombies, zombie)
 end
@@ -239,9 +257,29 @@ end
 
 --- Update the zombie manager
 function zombieManager:update(dt)
+    self.currentFrameInAnimation = self.currentFrameInAnimation+1/12
+    if self.currentFrameInAnimation > 6 then
+        self.currentFrameInAnimation = self.currentFrameInAnimation -5
+    end
+
     for i = #self.listZombies, 1, -1 do
         self.listZombies[i]:update(dt)
+        local zom = self.listZombies[i]
+        -- Look at others zombie
+        -- If anyone found the hero, then follow that zombie
+        for j=#self.listZombies,1,-1 do
+            if i~= j then
+                local z = self.listZombies[j]
+                if math.dist(zom.x, zom.y, z.x,z.y) <= zom.range*2 and z.state== ZS_RUN and zom.state ~= ZS_ATTACK and zom.state~= ZS_DEAD then
+                    zom.state = ZS_RUN
+                    zom.target = z.target
+                    break
+                end
+            end
+        end
+
         if self.listZombies[i].canRemove then
+            self.countTypes[self.listZombies[i].level] = self.countTypes[self.listZombies[i].level] -1
             table.remove(self.listZombies, i)
         end
     end
@@ -252,6 +290,19 @@ function zombieManager:draw()
     for i = 1, #self.listZombies do
         self.listZombies[i]:draw()
     end
+
+
+    -- GUI:
+    -- Show how many zombie is left
+    love.graphics.draw(headAnimations[1][math.floor(self.currentFrameInAnimation)],10,525)
+    love.graphics.print(self.countTypes[1],50,535)
+    love.graphics.draw(headAnimations[2][math.floor(self.currentFrameInAnimation)],80,525)
+    love.graphics.print(self.countTypes[2],120,535)
+    love.graphics.draw(headAnimations[3][math.floor(self.currentFrameInAnimation)],160,525)
+    love.graphics.print(self.countTypes[3],200,535)
+    love.graphics.draw(headAnimations[4][math.floor(self.currentFrameInAnimation)],240,525)
+    love.graphics.print(self.countTypes[4],275,535)
+
 end
 
 return zombieManager

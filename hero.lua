@@ -1,8 +1,8 @@
-local hero = newElement(100, 100, 6)
+local hero = newElement(100, 100, 4)
 hero.type = "HERO"
 hero.shootTimer = 0
-hero.shootTimerMax = .3
-hero.range = 120
+hero.shootTimerMax = .2
+hero.range = 140
 local animation = "IDLE"
 local zombie
 local dist
@@ -113,23 +113,24 @@ function hero:update(dt)
     updateAnimation(self, dt)
 
     --- Shoot at zombies
+    -- Find the nearest zombie
+    target.dist = 9000
+    target.id = 0
+    for z = #serviceManager.zombieManager.listZombies, 1, -1 do
+        zombie = serviceManager.zombieManager.listZombies[z]
+        dist = math.dist(zombie.x, zombie.y, self.x, self.y)
+        if dist < self.range then
+            if target.dist > dist then
+                target.dist = dist
+                target.id = z
+            end
+        end
+    end
+
     self.shootTimer = self.shootTimer - dt
     if love.keyboard.isDown("space") then
         fired = false
         if self.shootTimer <= 0 then
-            -- Find the nearest zombie
-            target.dist = 9000
-            target.id = 0
-            for z = #serviceManager.zombieManager.listZombies, 1, -1 do
-                zombie = serviceManager.zombieManager.listZombies[z]
-                dist = math.dist(zombie.x, zombie.y, self.x, self.y)
-                if dist < self.range then
-                    if target.dist > dist then
-                        target.dist = dist
-                        target.id = z
-                    end
-                end
-            end
             -- Shoot a the nearest zombie
             zombie = serviceManager.zombieManager.listZombies[target.id]
             if zombie ~= nil then
@@ -164,11 +165,24 @@ end
 function hero:draw  ()
     if self.currentAnimation ~= nil then
         love.graphics.draw(self.currentAnimation.frames[self.currentFrameInAnimation], self.x, self.y, 0, self.flip, 1, TILEWIDTH / 2, TILEHEIGHT / 2)
-        love.graphics.circle("line", self.x, self.y, self.range)
-        love.graphics.print(self.energy, self.x, self.y - TILEHEIGHT)
-        for i = 1, #serviceManager.zombieManager.listZombies do
-            zombie = serviceManager.zombieManager.listZombies[i]
-            love.graphics.line(self.x, self.y, zombie.x, zombie.y)
+--         love.graphics.circle("line", self.x, self.y, self.range)
+        love.graphics.print(self.energy, 10,10)
+--         for i = 1, #serviceManager.zombieManager.listZombies do
+--             zombie = serviceManager.zombieManager.listZombies[i]
+--             love.graphics.line(self.x, self.y, zombie.x, zombie.y)
+--         end
+        if target.id >= 0 then
+            zombie = serviceManager.zombieManager.listZombies[target.id]
+                love.graphics.push("all")
+                love.graphics.setColor(1,0,0,1)
+            if zombie~= nil then
+                love.graphics.line(zombie.x-3,zombie.y,zombie.x+3,zombie.y)
+                love.graphics.line(zombie.x,zombie.y-3,zombie.x,zombie.y+3)
+            else
+                love.graphics.line(self.x +(100*self.flip) -3,self.y,self.x+(100*self.flip)+3,self.y)
+                love.graphics.line(self.x+(100*self.flip),self.y-3,self.x+(100*self.flip),self.y+3)
+            end
+                love.graphics.pop()
         end
     end
 end

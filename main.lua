@@ -35,10 +35,10 @@ function love.update(dt)
 end
 
 function love.draw()
-    love.graphics.print(love.timer.getFPS().." FPS")
     if currentScene == SCENEGAME then
         sceneGame:draw()
     end
+--     love.graphics.print(love.timer.getFPS().." FPS")
 end
 
 ---@param key string

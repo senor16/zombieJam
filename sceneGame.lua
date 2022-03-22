@@ -104,7 +104,7 @@ local id=1
 local x,y=0,0
 local map
 local background
-local wall
+local wall,entities
 local sprite=0
 local tile
 serviceManager = {}
@@ -131,8 +131,30 @@ function loadLevel(pLevel)
 
     map = require("vault/levels/level"..pLevel)
     background = map.layers[1]
-    wall = map.layers[2]
     tile = map.tilesets[1]
+    wall = map.layers[2]
+    entities = map.layers[3]
+    id=1
+    for l=1,map.height do
+        for c=1,map.height do
+            if entities.data[id]== 16 then
+
+                zombieManager:addZombie((c-1)*TILEWIDTH+TILEWIDTH/2, (l-1)*TILEHEIGHT+TILEHEIGHT/2, 1)
+            elseif entities.data[id]== 146 then
+
+                zombieManager:addZombie((c-1)*TILEWIDTH+TILEWIDTH/2, (l-1)*TILEHEIGHT+TILEHEIGHT/2, 2)
+            elseif entities.data[id]== 186 then
+
+                zombieManager:addZombie((c-1)*TILEWIDTH+TILEWIDTH/2, (l-1)*TILEHEIGHT+TILEHEIGHT/2, 3)
+            elseif entities.data[id]== 171 then
+
+                zombieManager:addZombie((c-1)*TILEWIDTH+TILEWIDTH/2, (l-1)*TILEHEIGHT+TILEHEIGHT/2, 4)
+            end
+            id = id+1
+        end
+    end
+
+
     image =  love.graphics.newImage(tile.image)
     id=1
 
@@ -150,17 +172,13 @@ end
 
 --- Load the game scene
 function sceneGame:load()
-    loadLevel(3)
     hero:load()
-    zombieManager:addZombie(100, 200, 1)
-    zombieManager:addZombie(200, 200, 2)
-    zombieManager:addZombie(300, 200, 3)
-    zombieManager:addZombie(400, 200, 4)
     serviceManager.hero = hero
     serviceManager.zombieManager = zombieManager
     serviceManager.shootManager = shootManager
     zombieManager:load()
     shootManager:load()
+    loadLevel(3)
 end
 
 
@@ -197,9 +215,9 @@ end
 --- Draw the game scene
 function sceneGame:draw()
     drawMap()
-    hero:draw()
     zombieManager:draw()
     shootManager:draw()
+    hero:draw()
 end
 
 return sceneGame
