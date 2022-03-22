@@ -5,7 +5,9 @@ love.graphics.setDefaultFilter("nearest")
 screen = {}
 TILEWIDTH=32
 TILEHEIGHT=32
-
+font12 = love.graphics.newFont("vault/fonts/Kenney Future Narrow.ttf",12)
+font50 = love.graphics.newFont("vault/fonts/Kenney Future Narrow.ttf",50)
+font30 = love.graphics.newFont("vault/fonts/Kenney Future Narrow.ttf",30)
 function math.dist(x1,y1,x2,y2)
     return ((x2-x1)^2+(y2-y1)^2)^0.5
 end
@@ -19,6 +21,7 @@ local currentScene = SCENEGAME
 local sceneGame = require("sceneGame")
 
 function love.load()
+    love.graphics.setFont(font12)
     love.window.setMode(768,512)
     love.window.setTitle("Zommbie Jam")
     screen.width = love.graphics.getWidth()
@@ -47,5 +50,7 @@ end
 function love.keypressed(key)
     if key == "escape" then
         love.event.quit()
+    else
+        sceneGame:keypressed(key)
     end
 end

@@ -1,10 +1,5 @@
 local hero = newElement(100, 180, 3)
 hero.type = "HERO"
-hero.shootTimer = 0
-hero.shootTimerMax = .2
-hero.range = 100
-hero.energy=3
-hero.dead = false
 local animation = "IDLE"
 local zombie
 local dist
@@ -12,6 +7,17 @@ local oldX, oldY
 local target = { id = 0, dist = 8000 }
 local fired = false
 local shoot = { vx = 0, vy = 0, angle = 0 }
+
+function hero:reset()
+    self.shootTimer = 0
+    self.shootTimerMax = .2
+    self.range = 100
+    self.energy=30
+    self.dead = false
+end
+
+hero:reset()
+
 function hero:load()
     local images = {}
     --- Add animations
@@ -23,7 +29,7 @@ function hero:load()
             images[i] = love.graphics.newImage("vault/Hero/Animations/Idle/Idle_0" .. i .. ".png")
         end
     end
-    addAnimation(self.listAnimations, "IDLE", images, 1 / 25, true)
+        addAnimation(self.listAnimations, "IDLE", images, 1 / 25, true)
 
     -- RUN
     images = {}
@@ -83,6 +89,7 @@ end
 ---@param dt number
 function hero:update(dt)
     if self.dead == false then
+        animation="IDLE"
         -- Hero movement
         self.vx = 0
         self.vy = 0

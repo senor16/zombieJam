@@ -5,7 +5,7 @@
 ---@param pVx number
 ---@param pVy number
 ---@param pRotation number
----@param pImage love.image
+---@param pImage table
 ---@return table
 local function newShoot(pX, pY, pVx, pVy, pRotation, pImage)
     local shoot = {
