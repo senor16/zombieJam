@@ -7,6 +7,8 @@ TILEWIDTH=32
 TILEHEIGHT=32
 font12 = love.graphics.newFont("vault/fonts/Kenney Future Narrow.ttf",12)
 font50 = love.graphics.newFont("vault/fonts/Kenney Future Narrow.ttf",50)
+font40 = love.graphics.newFont("vault/fonts/Kenney Future Narrow.ttf",40)
+font70 = love.graphics.newFont("vault/fonts/Kenney Future Narrow.ttf",70)
 font30 = love.graphics.newFont("vault/fonts/Kenney Future Narrow.ttf",30)
 function math.dist(x1,y1,x2,y2)
     return ((x2-x1)^2+(y2-y1)^2)^0.5

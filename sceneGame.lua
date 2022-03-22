@@ -108,7 +108,8 @@ local tile
 local currentLevel = 1
 local maxLevel = 3
 local victory = false
-local gameComplete=false
+local gameComplete = false
+local start = false
 serviceManager = {}
 
 --- Get object position in the map
@@ -155,7 +156,7 @@ function loadLevel(pLevel)
     image = love.graphics.newImage(tile.image)
     id = 1
     quads = {}
-    y=0
+    y = 0
     for j = 1, tile.imageheight / TILEHEIGHT do
         x = 0
         for i = 1, tile.columns do
@@ -170,6 +171,13 @@ end
 --- Load the game scene
 function sceneGame:load()
     hero:load()
+    if currentLevel == 1 then
+        hero:reset(32 * 2, 32 * 14)
+    elseif currentLevel == 2 then
+        hero:reset(32, 32)
+    elseif currentLevel == 3 then
+        hero:reset(32 * 2, 32*8)
+    end
     serviceManager.hero = hero
     serviceManager.zombieManager = zombieManager
     serviceManager.shootManager = shootManager
@@ -182,11 +190,13 @@ end
 --- Update the game scene
 ---@param dt number
 function sceneGame:update(dt)
-    hero:update(dt)
-    zombieManager:update(dt)
-    shootManager:update(dt)
-    if #zombieManager.listZombies <= 0 then
-        victory = true
+    if start then
+        hero:update(dt)
+        zombieManager:update(dt)
+        shootManager:update(dt)
+        if #zombieManager.listZombies <= 0 then
+            victory = true
+        end
     end
 end
 
@@ -216,63 +226,93 @@ end
 --- Draw the game scene
 function sceneGame:draw()
     drawMap()
-    zombieManager:draw()
-    shootManager:draw()
-    hero:draw()
-    if hero.dead then
-        love.graphics.setFont(font50)
-        love.graphics.print("Vous êtes mort :(", 100, 190)
-        love.graphics.setFont(font30)
-        love.graphics.print("Appuiyez sur Entrer pour réessayer", 80, 280)
-        love.graphics.setFont(font12)
-    end
+    if start then
+        zombieManager:draw()
+        shootManager:draw()
+        hero:draw()
+        if hero.dead then
+            love.graphics.setFont(font50)
+            love.graphics.print("Vous êtes mort :(", 100, 190)
+            love.graphics.setFont(font30)
+            love.graphics.print("Appuiyez sur Entrer pour réessayer", 80, 280)
+            love.graphics.setFont(font12)
+        end
 
-    if victory then
-        love.graphics.setColor(0,0,0,.5)
-        love.graphics.rectangle("fill",0,0,screen.width,screen.height)
-        love.graphics.setColor(1,1,1,1)
-        love.graphics.setFont(font50)
-        love.graphics.print("Niveau complété", 100, 170)
-        love.graphics.setFont(font30)
-        love.graphics.print("Appuiyez sur Entrer pour continuer", 80, 280)
-        love.graphics.setFont(font12)
-    end
+        if victory and not gameComplete then
+            love.graphics.setColor(0, 0, 0, .5)
+            love.graphics.rectangle("fill", 0, 0, screen.width, screen.height)
+            love.graphics.setColor(1, 1, 1, 1)
+            love.graphics.setFont(font50)
+            love.graphics.print("Niveau complété", 100, 170)
+            love.graphics.setFont(font30)
+            love.graphics.print("Appuiyez sur Entrer pour continuer", 80, 280)
+            love.graphics.setFont(font12)
+        end
 
-    if gameComplete then
-        love.graphics.setColor(0,0,0,.5)
-        love.graphics.rectangle("fill",0,0,screen.width,screen.height)
-        love.graphics.setColor(1,1,1,1)
-        love.graphics.setFont(font50)
-        love.graphics.print("Vous avez terminé le jeu :)", 30, 170)
+        if gameComplete then
+            love.graphics.setColor(0, 0, 0, .5)
+            love.graphics.rectangle("fill", 0, 0, screen.width, screen.height)
+            love.graphics.setColor(1, 1, 1, 1)
+            love.graphics.setFont(font50)
+            love.graphics.print("Vous avez terminé le jeu :)", 30, 170)
+            love.graphics.setFont(font30)
+            love.graphics.print("Merci d'y avoir joué", 190, 280)
+            love.graphics.setFont(font12)
+        end
+    else
+        love.graphics.setColor(0, 0, 0, .5)
+        love.graphics.rectangle("fill", 0, 0, screen.width, screen.height)
+        love.graphics.setColor(1, 1, 1, 1)
+        love.graphics.setFont(font70)
+        love.graphics.print("ZOMBIE JAM", 150, 30)
+        love.graphics.setFont(font40)
+        love.graphics.print("PAR Sesso Kosga ", 190, 170)
         love.graphics.setFont(font30)
-        love.graphics.print("Merci d'y avoir joué", 190, 280)
+        love.graphics.print("Appuiyez sur Entrer", 190, 280)
         love.graphics.setFont(font12)
     end
 end
 
 function sceneGame:keypressed(key)
-    if hero.dead then
-        if key == "return" then
-            zombieManager:clean()
-            loadZombies()
-            hero:reset()
-        end
-    end
-    if victory then
-        if key == "return" then
-            if currentLevel < maxLevel then
-                currentLevel = currentLevel + 1
+    if start then
+        if hero.dead then
+            if key == "return" then
                 zombieManager:clean()
-                hero:reset()
-                victory = false
-                loadLevel(currentLevel)
                 loadZombies()
-            else
-                gameComplete = true
+                if currentLevel == 1 then
+                    hero:reset(32 * 2, 32 * 14)
+                elseif currentLevel == 2 then
+                    hero:reset(32, 32)
+                elseif currentLevel == 3 then
+                    hero:reset(32 * 2, 32*8)
+                end
             end
         end
+        if victory then
+            if key == "return" then
+                if currentLevel < maxLevel then
+                    currentLevel = currentLevel + 1
+                    zombieManager:clean()
+                    if currentLevel == 1 then
+                        hero:reset(32 * 2, 32 * 14)
+                    elseif currentLevel == 2 then
+                        hero:reset(32, 32)
+                    elseif currentLevel == 3 then
+                        hero:reset(32 * 2, 32*8)
+                    end
+                    victory = false
+                    loadLevel(currentLevel)
+                    loadZombies()
+                else
+                    gameComplete = true
+                end
+            end
+        end
+    else
+        if key == "return" then
+            start = true
+        end
     end
-
 end
 
 return sceneGame

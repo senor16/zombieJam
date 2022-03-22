@@ -8,15 +8,17 @@ local target = { id = 0, dist = 8000 }
 local fired = false
 local shoot = { vx = 0, vy = 0, angle = 0 }
 
-function hero:reset()
+function hero:reset(pX,pY)
     self.shootTimer = 0
     self.shootTimerMax = .2
     self.range = 100
     self.energy=30
+    self.x=pX
+    self.y=pY
     self.dead = false
 end
 
-hero:reset()
+hero:reset(32*2,32*14)
 
 function hero:load()
     local images = {}

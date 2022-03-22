@@ -21,8 +21,7 @@ local function newZombie(pX, pY, pSpeed, pLevel, pListAnimations)
     zombie.range = math.random(40, 100)
     zombie.listAnimations = pListAnimations
     zombie.speed = pLevel * 3 / 1000
-    --zombie.energy = pLevel * 2.5
-    zombie.energy = pLevel
+    zombie.energy = pLevel * 2.5
     --- Update the zombie
     function zombie:load()
         playAnimation(self, animation)
@@ -141,7 +140,7 @@ local function newZombie(pX, pY, pSpeed, pLevel, pListAnimations)
         end
 
         playAnimation(self, animation)
-        if self.vx < 1 then
+        if self.vx < .5 then
             self.flip = -math.abs(self.flip)
         else
             self.flip = math.abs(self.flip)
