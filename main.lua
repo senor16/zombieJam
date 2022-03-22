@@ -19,6 +19,8 @@ local currentScene = SCENEGAME
 local sceneGame = require("sceneGame")
 
 function love.load()
+    love.window.setMode(768,512)
+    love.window.setTitle("Zommbie Jam")
     screen.width = love.graphics.getWidth()
     screen.height = love.graphics.getHeight()
     love.window.setTitle("Zombie Jam")

@@ -1,8 +1,10 @@
-local hero = newElement(100, 100, 4)
+local hero = newElement(100, 180, 3)
 hero.type = "HERO"
 hero.shootTimer = 0
 hero.shootTimerMax = .2
-hero.range = 140
+hero.range = 100
+hero.energy=3
+hero.dead = false
 local animation = "IDLE"
 local zombie
 local dist
@@ -61,103 +63,108 @@ function hero:load()
             images[i] = love.graphics.newImage("vault/Hero/Animations/Death/Death_0" .. i .. ".png")
         end
     end
-    addAnimation(self.listAnimations, "DEATH", images, 1 / 25, true)
+    addAnimation(self.listAnimations, "DEAD", images, 1 / 25, false)
 
     playAnimation(self, "IDLE")
 end
 
 --- Hurt the hero
 function hero:hurt()
-    self.energy = self.energy - 1
-    playAnimation(self, "HURT")
+    if self.energy >0 then
+        self.energy = self.energy - 1
+        playAnimation(self, "HURT")
+    else
+        animation = "DEAD"
+        self.dead = true
+    end
 end
 
 --- Update the hero
 ---@param dt number
 function hero:update(dt)
-    animation = "IDLE"
-    -- Hero movement
-    self.vx = 0
-    self.vy = 0
-    -- Backup hero position
-    oldX = self.x
-    oldY = self.y
-    if love.keyboard.isDown("up") and self.y - TILEHEIGHT / 2 > 0 then
-        self.vy = -self.speed * 60 * dt
-        animation = "RUN"
-    end
-    if love.keyboard.isDown("right") and self.x + TILEWIDTH / 2 < screen.width then
-        self.vx = self.speed * 60 * dt
-        self.flip = 1
-        animation = "RUN"
-    end
-    if love.keyboard.isDown("down") and self.y + TILEHEIGHT / 2 < screen.height then
-        self.vy = self.speed * 60 * dt
-        animation = "RUN"
-    end
-    if love.keyboard.isDown("left") and self.x - TILEHEIGHT / 2 > 0 then
-        self.vx = -self.speed * 60 * dt
-        self.flip = -1
-        animation = "RUN"
-    end
-    self.x = self.x + self.vx
-    self.y = self.y + self.vy
-    ---- Check if the hero is not in a wall
-    if isWall(getPosition(self.x-TILEWIDTH/3, self.y-TILEHEIGHT/3)) or isWall(getPosition(self.x+TILEWIDTH/3, self.y+TILEHEIGHT/3)) then
-        -- If he is, bring him back
-        self.x = oldX
-        self.y = oldY
-    end
+    if self.dead == false then
+        -- Hero movement
+        self.vx = 0
+        self.vy = 0
+        -- Backup hero position
+        oldX = self.x
+        oldY = self.y
+        if love.keyboard.isDown("up") and self.y - TILEHEIGHT / 2 > 0 then
+            self.vy = -self.speed * 60 * dt
+            animation = "RUN"
+        end
+        if love.keyboard.isDown("right") and self.x + TILEWIDTH / 2 < screen.width then
+            self.vx = self.speed * 60 * dt
+            self.flip = 1
+            animation = "RUN"
+        end
+        if love.keyboard.isDown("down") and self.y + TILEHEIGHT / 2 < screen.height then
+            self.vy = self.speed * 60 * dt
+            animation = "RUN"
+        end
+        if love.keyboard.isDown("left") and self.x - TILEHEIGHT / 2 > 0 then
+            self.vx = -self.speed * 60 * dt
+            self.flip = -1
+            animation = "RUN"
+        end
 
+        self.x = self.x + self.vx
+        self.y = self.y + self.vy
+        ---- Check if the hero is not in a wall
+        if isWall(getPosition(self.x-TILEWIDTH/3, self.y-TILEHEIGHT/3)) or isWall(getPosition(self.x+TILEWIDTH/3, self.y+TILEHEIGHT/3)) then
+            -- If he is, bring him back
+            self.x = oldX
+            self.y = oldY
+        end
+
+        --- Shoot at zombies
+        -- Find the nearest zombie
+        target.dist = 9000
+        target.id = 0
+        for z = #serviceManager.zombieManager.listZombies, 1, -1 do
+            zombie = serviceManager.zombieManager.listZombies[z]
+            dist = math.dist(zombie.x, zombie.y, self.x, self.y)
+            if dist < self.range then
+                if target.dist > dist then
+                    target.dist = dist
+                    target.id = z
+                end
+            end
+        end
+
+        self.shootTimer = self.shootTimer - dt
+        if love.keyboard.isDown("space") then
+            fired = false
+            if self.shootTimer <= 0 then
+                -- Shoot a the nearest zombie
+                zombie = serviceManager.zombieManager.listZombies[target.id]
+                if zombie ~= nil then
+                    shoot.angle = math.angle(self.x, self.y, zombie.x, zombie.y)
+                    shoot.vx = 4 * math.cos(shoot.angle)
+                    shoot.vy = 4 * math.sin(shoot.angle)
+                    if shoot.vx <= 0 then
+                        self.flip = -math.abs(self.flip)
+                    else
+                        self.flip = math.abs(self.flip)
+                    end
+                    serviceManager.shootManager:addShoot(self.x, self.y, shoot.vx, shoot.vy, shoot.angle)
+                    fired = true
+                end
+                if fired == false then
+                    if self.flip < 0 then
+                        angle = math.rad(180)
+                    else
+                        angle = 0
+                    end
+                    serviceManager.shootManager:addShoot(self.x, self.y, self.flip * 4, 0, angle)
+                end
+                self.shootTimer = self.shootTimerMax
+            end
+            animation = "SHOOT"
+        end
+end
     -- Hero animation
     updateAnimation(self, dt)
-
-    --- Shoot at zombies
-    -- Find the nearest zombie
-    target.dist = 9000
-    target.id = 0
-    for z = #serviceManager.zombieManager.listZombies, 1, -1 do
-        zombie = serviceManager.zombieManager.listZombies[z]
-        dist = math.dist(zombie.x, zombie.y, self.x, self.y)
-        if dist < self.range then
-            if target.dist > dist then
-                target.dist = dist
-                target.id = z
-            end
-        end
-    end
-
-    self.shootTimer = self.shootTimer - dt
-    if love.keyboard.isDown("space") then
-        fired = false
-        if self.shootTimer <= 0 then
-            -- Shoot a the nearest zombie
-            zombie = serviceManager.zombieManager.listZombies[target.id]
-            if zombie ~= nil then
-                shoot.angle = math.angle(self.x, self.y, zombie.x, zombie.y)
-                shoot.vx = 4 * math.cos(shoot.angle)
-                shoot.vy = 4 * math.sin(shoot.angle)
-                if shoot.vx <= 0 then
-                    self.flip = -math.abs(self.flip)
-                else
-                    self.flip = math.abs(self.flip)
-                end
-                serviceManager.shootManager:addShoot(self.x, self.y, shoot.vx, shoot.vy, shoot.angle)
-                fired = true
-            end
-            if fired == false then
-                if self.flip < 0 then
-                    angle = math.rad(180)
-                else
-                    angle = 0
-                end
-                serviceManager.shootManager:addShoot(self.x, self.y, self.flip * 4, 0, angle)
-            end
-            self.shootTimer = self.shootTimerMax
-        end
-        animation = "SHOOT"
-    end
-
     playAnimation(self, animation)
 end
 
@@ -166,7 +173,6 @@ function hero:draw  ()
     if self.currentAnimation ~= nil then
         love.graphics.draw(self.currentAnimation.frames[self.currentFrameInAnimation], self.x, self.y, 0, self.flip, 1, TILEWIDTH / 2, TILEHEIGHT / 2)
 --         love.graphics.circle("line", self.x, self.y, self.range)
-        love.graphics.print(self.energy, 10,10)
 --         for i = 1, #serviceManager.zombieManager.listZombies do
 --             zombie = serviceManager.zombieManager.listZombies[i]
 --             love.graphics.line(self.x, self.y, zombie.x, zombie.y)
@@ -185,6 +191,10 @@ function hero:draw  ()
                 love.graphics.pop()
         end
     end
+
+    love.graphics.draw(self.listAnimations["IDLE"].frames[1],300,480)
+    love.graphics.print(self.energy, 337,490)
+
 end
 
 return hero

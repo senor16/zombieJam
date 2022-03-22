@@ -136,15 +136,13 @@ function loadLevel(pLevel)
     entities = map.layers[3]
     id=1
     for l=1,map.height do
-        for c=1,map.height do
+        for c=1,map.width do
             if entities.data[id]== 16 then
 
                 zombieManager:addZombie((c-1)*TILEWIDTH+TILEWIDTH/2, (l-1)*TILEHEIGHT+TILEHEIGHT/2, 1)
-            elseif entities.data[id]== 146 then
-
+            elseif entities.data[id]== 146 or entities.data[id]== 36 then
                 zombieManager:addZombie((c-1)*TILEWIDTH+TILEWIDTH/2, (l-1)*TILEHEIGHT+TILEHEIGHT/2, 2)
-            elseif entities.data[id]== 186 then
-
+            elseif entities.data[id]== 186 or entities.data[id]== 18 then
                 zombieManager:addZombie((c-1)*TILEWIDTH+TILEWIDTH/2, (l-1)*TILEHEIGHT+TILEHEIGHT/2, 3)
             elseif entities.data[id]== 171 then
 
@@ -178,7 +176,7 @@ function sceneGame:load()
     serviceManager.shootManager = shootManager
     zombieManager:load()
     shootManager:load()
-    loadLevel(3)
+    loadLevel(1)
 end
 
 
