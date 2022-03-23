@@ -7,7 +7,7 @@ Jeu réalisé à l'occasion de la [Gamecodeur Game Jam #35](https://itch.io/jam/
 ####  Sous - Theme : Comportements d'ennemis
 
 ### Langage / Framework utilisé : `Lua/Love 2d`
-
+#### Version: Löve 11.4
 ### Code par moi
 
 ### Graphisme :
